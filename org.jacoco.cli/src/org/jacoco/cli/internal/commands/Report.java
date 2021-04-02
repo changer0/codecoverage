@@ -13,19 +13,11 @@
  *******************************************************************************/
 package org.jacoco.cli.internal.commands;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
 import org.jacoco.cli.internal.Command;
-import org.jacoco.core.analysis.Analyzer;
-import org.jacoco.core.analysis.CoverageBuilder;
-import org.jacoco.core.analysis.IBundleCoverage;
-import org.jacoco.core.analysis.IClassCoverage;
+import org.jacoco.core.analysis.*;
 import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.tools.ExecFileLoader;
 import org.jacoco.report.DirectorySourceFileLocator;
@@ -72,6 +64,9 @@ public class Report extends Command {
 	@Option(name = "--html", usage = "output directory for the HTML report", metaVar = "<dir>")
 	File html;
 
+	@Option(name = "--excludes", usage = "used to exclude classes", metaVar = "<file>")
+	File excludes;
+
 	@Override
 	public String description() {
 		return "Generate reports in different formats by reading exec and Java class files.";
@@ -81,10 +76,58 @@ public class Report extends Command {
 	public int execute(final PrintWriter out, final PrintWriter err)
 			throws IOException {
 		final ExecFileLoader loader = loadExecutionData(out);
-		final IBundleCoverage bundle = analyze(loader.getExecutionDataStore(),
-				out);
+		final IBundleCoverage bundle = analyze(loader.getExecutionDataStore(), out);
+		excludeClass(bundle, out);
 		writeReports(bundle, loader, out);
 		return 0;
+	}
+
+	private Set<String> excludeClassSet = new HashSet<String>();
+
+	private void excludeClass(IBundleCoverage bundle, final PrintWriter out) {
+		analysisExcludes(out);
+		Collection<IPackageCoverage> packages = bundle.getPackages();
+		for (IPackageCoverage aPackage : packages) {
+			Collection<IClassCoverage> classes = aPackage.getClasses();
+			Iterator<IClassCoverage> iterator = classes.iterator();
+			while (iterator.hasNext()) {
+				IClassCoverage aClass = iterator.next();
+				out.println("obtain name: " + aClass.getName());
+
+				if (excludeClassSet.contains(aClass.getName())) {
+					iterator.remove();
+				}
+			}
+
+		}
+	}
+
+	private void analysisExcludes(PrintWriter out) {
+		if (excludes == null) {
+			return;
+		}
+		out.println("excludes file path: " + excludes.getPath());
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(excludes));
+			out.println("excludes file content: ");
+			while(br.ready()) {
+				String x = br.readLine();
+				excludeClassSet.add(x);
+				out.println(x);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (br != null) {
+					br.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private ExecFileLoader loadExecutionData(final PrintWriter out)

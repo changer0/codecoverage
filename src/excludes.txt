@@ -1,0 +1,2 @@
+com/lulu/jacocodemo/BuildConfig
+com/lulu/jacocodemo/JaCoCoUtils
