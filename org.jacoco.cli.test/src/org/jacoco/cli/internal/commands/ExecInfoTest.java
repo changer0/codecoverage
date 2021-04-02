@@ -77,4 +77,19 @@ public class ExecInfoTest extends CommandTestBase {
 		return f;
 	}
 
+
+
+	@Test
+	public void myTest() throws Exception {
+		String srcPath = "../src/";
+		String outPath = "../out/";
+		String ecFilePath = srcPath + "coverage.ec";
+		String convOutPath = outPath + "coverage.txt";
+
+		execute("execinfo", ecFilePath);
+
+		System.out.println("输出:");
+		System.out.println(out);
+	}
+
 }
