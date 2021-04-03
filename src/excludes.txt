@@ -1,2 +1,2 @@
-com/lulu/jacocodemo/BuildConfig
-com/lulu/jacocodemo/JaCoCoUtils
+a/app/src/main/java/com/lulu/jacocodemo/StudentA.kt
+a/app/src/main/java/com/lulu/jacocodemo/StudentB.java

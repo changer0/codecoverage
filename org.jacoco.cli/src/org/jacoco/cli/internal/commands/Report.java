@@ -87,19 +87,31 @@ public class Report extends Command {
 	private void excludeClass(IBundleCoverage bundle, final PrintWriter out) {
 		analysisExcludes(out);
 		Collection<IPackageCoverage> packages = bundle.getPackages();
+		out.println("need to exclude class: ");
 		for (IPackageCoverage aPackage : packages) {
 			Collection<IClassCoverage> classes = aPackage.getClasses();
 			Iterator<IClassCoverage> iterator = classes.iterator();
 			while (iterator.hasNext()) {
 				IClassCoverage aClass = iterator.next();
-				out.println("obtain name: " + aClass.getName());
-
-				if (excludeClassSet.contains(aClass.getName())) {
+				if (isInclude(aClass.getName())) {
+					out.println(aClass.getName());
 					iterator.remove();
 				}
 			}
 
 		}
+	}
+
+	private boolean isInclude(String className) {
+		Iterator<String> iterator = excludeClassSet.iterator();
+		while (iterator.hasNext()) {
+			String next = iterator.next();
+			if (next.contains(className)) {
+				iterator.remove();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void analysisExcludes(PrintWriter out) {
