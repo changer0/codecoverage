@@ -151,7 +151,7 @@ public class ReportTest extends CommandTestBase {
 
 
 	@Test
-	public void myTest() throws Exception {
+	public void incrementTest() throws Exception {
 		String srcPath = "../src/";
 		String outPath = "../out/";
 		String ecFilePath = srcPath + "coverage.ec";
@@ -161,7 +161,23 @@ public class ReportTest extends CommandTestBase {
 				"--xml", outPath + "report.xml",
 				"--classfiles", classPath,
 				"--html", outPath + "html/",
-				"--excludes", srcPath + "excludes.txt");
+				"--increment", srcPath + "excludes.txt");
+
+		System.out.println("输出:");
+		System.out.println(out);
+	}
+
+	@Test
+	public void test() throws Exception {
+		String srcPath = "../src/";
+		String outPath = "../out/";
+		String ecFilePath = srcPath + "coverage.ec";
+		String classPath = srcPath + "classes/";
+
+		execute("report", ecFilePath,
+				"--xml", outPath + "report.xml",
+				"--classfiles", classPath,
+				"--html", outPath + "html/");
 
 		System.out.println("输出:");
 		System.out.println(out);

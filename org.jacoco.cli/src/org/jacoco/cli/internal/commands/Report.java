@@ -65,7 +65,10 @@ public class Report extends Command {
 	File html;
 
 	@Option(name = "--excludes", usage = "used to exclude classes", metaVar = "<file>")
-	File excludes;
+	File excludesFile;
+
+	@Option(name = "--increment", usage = "incremental class ", metaVar = "<file>")
+	File incrementFile;
 
 	@Override
 	public String description() {
@@ -77,15 +80,51 @@ public class Report extends Command {
 			throws IOException {
 		final ExecFileLoader loader = loadExecutionData(out);
 		final IBundleCoverage bundle = analyze(loader.getExecutionDataStore(), out);
-		excludeClass(bundle, out);
+		replaceBundleIncrementClass(bundle, out);
+		replaceBundleExcludeClass(bundle, out);
 		writeReports(bundle, loader, out);
 		return 0;
 	}
 
-	private Set<String> excludeClassSet = new HashSet<String>();
+	private final Set<String> incrementClassSet = new HashSet<String>();
 
-	private void excludeClass(IBundleCoverage bundle, final PrintWriter out) {
-		analysisExcludes(out);
+	private void replaceBundleIncrementClass(IBundleCoverage bundle, final PrintWriter out) {
+		if (incrementFile == null) {
+			return;
+		}
+		analysisStringFile(out, incrementFile, incrementClassSet, "increment");
+		Collection<IPackageCoverage> packages = bundle.getPackages();
+		out.println("need to increment class: ");
+		Set<Long> ids = new HashSet<Long>();
+		for (IPackageCoverage aPackage : packages) {
+			Collection<IClassCoverage> classes = aPackage.getClasses();
+			for (IClassCoverage aClass : classes) {
+				if (isInclude(incrementClassSet, aClass.getName())) {
+					out.println(aClass.getName());
+					ids.add(aClass.getId());
+				}
+			}
+		}
+		//执行删除
+		for (IPackageCoverage aPackage : packages) {
+			Collection<IClassCoverage> classes = aPackage.getClasses();
+			Iterator<IClassCoverage> iterator = classes.iterator();
+			while (iterator.hasNext()) {
+				IClassCoverage aClass = iterator.next();
+				if (!ids.contains(aClass.getId())) {
+					iterator.remove();
+				}
+			}
+		}
+	}
+
+	private final Set<String> excludeClassSet = new HashSet<String>();
+
+	private void replaceBundleExcludeClass(IBundleCoverage bundle, final PrintWriter out) {
+		if (excludesFile == null) {
+			return;
+		}
+		analysisStringFile(out, excludesFile, excludeClassSet, "excludes");
 		Collection<IPackageCoverage> packages = bundle.getPackages();
 		out.println("need to exclude class: ");
 		for (IPackageCoverage aPackage : packages) {
@@ -93,39 +132,26 @@ public class Report extends Command {
 			Iterator<IClassCoverage> iterator = classes.iterator();
 			while (iterator.hasNext()) {
 				IClassCoverage aClass = iterator.next();
-				if (isInclude(aClass.getName())) {
+				if (isInclude(excludeClassSet, aClass.getName())) {
 					out.println(aClass.getName());
 					iterator.remove();
 				}
 			}
-
 		}
 	}
 
-	private boolean isInclude(String className) {
-		Iterator<String> iterator = excludeClassSet.iterator();
-		while (iterator.hasNext()) {
-			String next = iterator.next();
-			if (next.contains(className)) {
-				iterator.remove();
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void analysisExcludes(PrintWriter out) {
-		if (excludes == null) {
+	private void analysisStringFile(PrintWriter out, File file, Set<String> stringSet,  String log) {
+		if (file == null) {
 			return;
 		}
-		out.println("excludes file path: " + excludes.getPath());
+		out.println(log + " file path: " + file.getPath());
 		BufferedReader br = null;
 		try {
-			br = new BufferedReader(new FileReader(excludes));
-			out.println("excludes file content: ");
+			br = new BufferedReader(new FileReader(file));
+			out.println(log + " file content: ");
 			while(br.ready()) {
 				String x = br.readLine();
-				excludeClassSet.add(x);
+				stringSet.add(x);
 				out.println(x);
 			}
 
@@ -140,6 +166,18 @@ public class Report extends Command {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private boolean isInclude(Set<String> stringSet, String className) {
+		Iterator<String> iterator = stringSet.iterator();
+		while (iterator.hasNext()) {
+			String next = iterator.next();
+			if (next.contains(className)) {
+				iterator.remove();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private ExecFileLoader loadExecutionData(final PrintWriter out)
