@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
@@ -51,6 +53,8 @@ public class Analyzer {
 	private final ICoverageVisitor coverageVisitor;
 
 	private final StringPool stringPool;
+
+	private Set<String> incrementClassSet;
 
 	/**
 	 * Creates a new analyzer reporting to the given output.
@@ -111,9 +115,32 @@ public class Analyzer {
 		if ((reader.getAccess() & Opcodes.ACC_SYNTHETIC) != 0) {
 			return;
 		}
+		String className = reader.getClassName();
+		//1. 先看有没有设置增量类, 如果没有设置 isInclude 返回 true
+		//2. 如果有设置, 若当前包含在所设置的增量类中, 则返回 false 当前方法 return
+		if (!isInclude(incrementClassSet, className)) {
+			return;
+		}
+		//System.out.println("当前包含的类名: " + className);
+
 		final ClassVisitor visitor = createAnalyzingVisitor(classId,
-				reader.getClassName());
+				className);
 		reader.accept(visitor, 0);
+	}
+
+	private boolean isInclude(Set<String> stringSet, String className) {
+		if (stringSet == null || stringSet.isEmpty()) {
+			return true;
+		}
+		Iterator<String> iterator = stringSet.iterator();
+		while (iterator.hasNext()) {
+			String next = iterator.next();
+			if (className.contains(next)) {
+				//iterator.remove(); 不可删掉 针对内部类的场景 !
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -298,4 +325,7 @@ public class Analyzer {
 		return analyzeAll(unpackedInput, location);
 	}
 
+	public void setIncrementClassSet(Set<String> incrementClassSet) {
+		this.incrementClassSet = incrementClassSet;
+	}
 }

@@ -1,2 +1,2 @@
-a/app/src/main/java/com/lulu/jacocodemo/StudentA.kt
-a/app/src/main/java/com/lulu/jacocodemo/StudentB.java
+com/lulu/jacocodemo/StudentA
+com/lulu/jacocodemo/StudentB

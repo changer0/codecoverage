@@ -64,9 +64,6 @@ public class Report extends Command {
 	@Option(name = "--html", usage = "output directory for the HTML report", metaVar = "<dir>")
 	File html;
 
-	@Option(name = "--excludes", usage = "used to exclude classes", metaVar = "<file>")
-	File excludesFile;
-
 	@Option(name = "--increment", usage = "incremental class ", metaVar = "<file>")
 	File incrementFile;
 
@@ -80,67 +77,13 @@ public class Report extends Command {
 			throws IOException {
 		final ExecFileLoader loader = loadExecutionData(out);
 		final IBundleCoverage bundle = analyze(loader.getExecutionDataStore(), out);
-		replaceBundleIncrementClass(bundle, out);
-		replaceBundleExcludeClass(bundle, out);
 		writeReports(bundle, loader, out);
 		return 0;
 	}
 
 	private final Set<String> incrementClassSet = new HashSet<String>();
 
-	private void replaceBundleIncrementClass(IBundleCoverage bundle, final PrintWriter out) {
-		if (incrementFile == null) {
-			return;
-		}
-		analysisStringFile(out, incrementFile, incrementClassSet, "increment");
-		Collection<IPackageCoverage> packages = bundle.getPackages();
-		out.println("need to increment class: ");
-		Set<Long> ids = new HashSet<Long>();
-		for (IPackageCoverage aPackage : packages) {
-			Collection<IClassCoverage> classes = aPackage.getClasses();
-			for (IClassCoverage aClass : classes) {
-				if (isInclude(incrementClassSet, aClass.getName())) {
-					out.println(aClass.getName());
-					ids.add(aClass.getId());
-				}
-			}
-		}
-		//执行删除
-		for (IPackageCoverage aPackage : packages) {
-			Collection<IClassCoverage> classes = aPackage.getClasses();
-			Iterator<IClassCoverage> iterator = classes.iterator();
-			while (iterator.hasNext()) {
-				IClassCoverage aClass = iterator.next();
-				if (!ids.contains(aClass.getId())) {
-					iterator.remove();
-				}
-			}
-		}
-	}
-
-	private final Set<String> excludeClassSet = new HashSet<String>();
-
-	private void replaceBundleExcludeClass(IBundleCoverage bundle, final PrintWriter out) {
-		if (excludesFile == null) {
-			return;
-		}
-		analysisStringFile(out, excludesFile, excludeClassSet, "excludes");
-		Collection<IPackageCoverage> packages = bundle.getPackages();
-		out.println("need to exclude class: ");
-		for (IPackageCoverage aPackage : packages) {
-			Collection<IClassCoverage> classes = aPackage.getClasses();
-			Iterator<IClassCoverage> iterator = classes.iterator();
-			while (iterator.hasNext()) {
-				IClassCoverage aClass = iterator.next();
-				if (isInclude(excludeClassSet, aClass.getName())) {
-					out.println(aClass.getName());
-					iterator.remove();
-				}
-			}
-		}
-	}
-
-	private void analysisStringFile(PrintWriter out, File file, Set<String> stringSet,  String log) {
+	private void analyzeStringSetFile(PrintWriter out, File file, Set<String> stringSet, String log) {
 		if (file == null) {
 			return;
 		}
@@ -168,18 +111,6 @@ public class Report extends Command {
 		}
 	}
 
-	private boolean isInclude(Set<String> stringSet, String className) {
-		Iterator<String> iterator = stringSet.iterator();
-		while (iterator.hasNext()) {
-			String next = iterator.next();
-			if (next.contains(className)) {
-				iterator.remove();
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private ExecFileLoader loadExecutionData(final PrintWriter out)
 			throws IOException {
 		final ExecFileLoader loader = new ExecFileLoader();
@@ -198,7 +129,9 @@ public class Report extends Command {
 	private IBundleCoverage analyze(final ExecutionDataStore data,
 			final PrintWriter out) throws IOException {
 		final CoverageBuilder builder = new CoverageBuilder();
+		analyzeStringSetFile(out, incrementFile, incrementClassSet, "increment");
 		final Analyzer analyzer = new Analyzer(data, builder);
+		analyzer.setIncrementClassSet(incrementClassSet);
 		for (final File f : classfiles) {
 			analyzer.analyzeAll(f);
 		}
