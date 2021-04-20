@@ -165,6 +165,7 @@ public class ReportTest extends CommandTestBase {
 
 		System.out.println("输出:");
 		System.out.println(out);
+		//java -jar cli.jar report src/coverage.ec --classfiles src/classes/ --html out/test/ --increment src/increment.txt
 	}
 
 	@Test
