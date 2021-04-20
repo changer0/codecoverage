@@ -114,3 +114,6 @@ for item in searchObj:
 # 关闭打开的文件
 f.close()
 print("处理完成(*^▽^*)")
+
+
+#测试代码: python3 git_increment.py --workspace /Users/zhanglulu/AndroidStudioProjects/JaCoCoDemo --branch develop master --out file_test.txt
