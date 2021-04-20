@@ -30,6 +30,7 @@ output_file = "increment.txt"
 branch_key = "--branch"
 compare_branch = ""
 cur_branch = ""
+#遍历取参数
 for i in range(len(sys.argv)):
     if branch_key == sys.argv[i]:
         if i+1 >= len(sys.argv) or i+2 >= len(sys.argv):
@@ -66,9 +67,16 @@ cmd_git_fetch = "git fetch"
 run_cmd(cmd_git_fetch)
 
 # cmd_git_checkout_old_branch = "git checkout -b " + old_branch + " origin/" + old_branch
-cmd_git_checkout_new_branch = "git checkout -b " + cur_branch + " origin/" + cur_branch
-print("开始切换分支: ", cur_branch)
-run_cmd(cmd_git_checkout_new_branch)
+cmd_create_new_branch = "git checkout -b " + cur_branch + " origin/" + cur_branch
+cmd_checkout_new_branch = "git checkout " + cur_branch
+
+print("切换分支: ", cur_branch)
+run_cmd(cmd_create_new_branch)
+run_cmd(cmd_checkout_new_branch)
+print("拉取代码: ", cur_branch)
+run_cmd("git pull")
+
+print("----------------")
 
 print("开始比对")
 git_diff_result = run_cmd("git diff origin/" + compare_branch + " origin/" + cur_branch)
