@@ -50,7 +50,7 @@ public class Report extends Command {
 	int tabwidth = 4;
 
 	@Option(name = "--name", usage = "name used for this report", metaVar = "<name>")
-	String name = "JaCoCo Coverage Report";
+	String name = "YueWen Coverage Report";
 
 	@Option(name = "--encoding", usage = "source file encoding (by default platform encoding is used)", metaVar = "<charset>")
 	String encoding;

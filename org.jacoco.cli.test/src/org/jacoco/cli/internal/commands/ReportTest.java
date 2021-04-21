@@ -161,6 +161,7 @@ public class ReportTest extends CommandTestBase {
 				"--xml", outPath + "report.xml",
 				"--classfiles", classPath,
 				"--html", outPath + "html/",
+				"--name", "QQ Reader Coverage Report",
 				"--increment", srcPath + "increment.txt");
 
 		System.out.println("输出:");
