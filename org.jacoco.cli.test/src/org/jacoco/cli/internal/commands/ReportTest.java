@@ -152,18 +152,14 @@ public class ReportTest extends CommandTestBase {
 
 	@Test
 	public void incrementTest() throws Exception {
-		String srcPath = "../src/";
-		String outPath = "../out/";
-		String ecFilePath = srcPath + "coverage.ec";
-		String classPath = srcPath + "classes/";
-
-		execute("report", ecFilePath,
-				"--xml", outPath + "report.xml",
-				"--classfiles", classPath,
-				"--html", outPath + "html/",
+		String rootPath  = "../terminal/";
+		execute("report", rootPath + "coverage.ec",
+				"--classfiles", "/Users/zhanglulu/AndroidStudioProjects/QQReader_Android_other/coverage_src/classes",
+				"--sourcefiles", "/Users/zhanglulu/AndroidStudioProjects/QQReader_Android_other/coverage_src/source",
+				"--html", rootPath + "html/",
 				"--name", "QQ Reader Coverage Report",
-				"--increment", srcPath + "increment.txt");
-
+				"--incrementPrefixFlag", "com/qq/reader",//增量前缀标识
+				"--increment",rootPath + "increment.txt");
 		System.out.println("输出:");
 		System.out.println(out);
 		//java -jar cli.jar report src/coverage.ec --classfiles src/classes/ --html out/test/ --increment src/increment.txt

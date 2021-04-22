@@ -67,6 +67,9 @@ public class Report extends Command {
 	@Option(name = "--increment", usage = "incremental class ", metaVar = "<file>")
 	File incrementFile;
 
+	@Option(name = "--incrementPrefixFlag", usage = "用于过滤前缀")
+	String incrementPrefixFlag = "com/qq";
+
 	@Override
 	public String description() {
 		return "Generate reports in different formats by reading exec and Java class files.";
@@ -83,23 +86,28 @@ public class Report extends Command {
 
 	private final Set<String> incrementClassSet = new HashSet<String>();
 
-	private void analyzeStringSetFile(PrintWriter out, File file, Set<String> stringSet, String log) {
+	/**
+	 * 解析增量 Class
+	 */
+	private void analyzeIncrementSetFile(PrintWriter out, File file, Set<String> stringSet) throws IOException {
 		if (file == null) {
 			return;
 		}
-		out.println(log + " file path: " + file.getPath());
+		out.println("increment" + " file path: " + file.getPath() + " incrementPrefixFlag = " + incrementPrefixFlag);
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(file));
-			out.println(log + " file content: ");
+			out.println("increment" + " file content: ");
 			while(br.ready()) {
 				String x = br.readLine();
+				x = x.substring(x.indexOf(incrementPrefixFlag));
+				String[] split = x.split("\\.");
+				if (split.length > 1) {
+					x = split[0];
+				}
 				stringSet.add(x);
 				out.println(x);
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			try {
 				if (br != null) {
@@ -129,7 +137,7 @@ public class Report extends Command {
 	private IBundleCoverage analyze(final ExecutionDataStore data,
 			final PrintWriter out) throws IOException {
 		final CoverageBuilder builder = new CoverageBuilder();
-		analyzeStringSetFile(out, incrementFile, incrementClassSet, "increment");
+		analyzeIncrementSetFile(out, incrementFile, incrementClassSet);
 		final Analyzer analyzer = new Analyzer(data, builder);
 		analyzer.setIncrementClassSet(incrementClassSet);
 		for (final File f : classfiles) {

@@ -1,0 +1,7 @@
+QRBusiness/Share/ShareServerApi/src/main/java/com/qq/reader/share/server/api/ShareRequestData.java
+build-types/debug/java/com/qq/reader/codecoverage/JaCoCoUtils.java
+build-types/debug/java/com/qq/reader/common/monitor/debug/DebugRoutingActivity.java
+src/com/qq/reader/activity/TestCoverageClazz.java
+src/com/qq/reader/activity/TestCoverageKotlin.kt
+src/com/qq/reader/activity/UserCenterFragment.java
+src/com/qq/reader/common/db/handle/BookmarkHandle.java

@@ -85,7 +85,7 @@ searchObj = re.findall( '^diff --git (.*) ', git_diff_result, re.M | re.I)
 #searchObj = open("test_increment.txt", mode='r')
 #print(cmd_result)
 #print(searchObj.group(0))
-prefix = "/java/"
+prefix = "a/"
 
 f = open(output_file, "w+")
 for item in searchObj:
@@ -107,7 +107,7 @@ for item in searchObj:
         continue
     #print("发现路径:", find_index)
     find_index = find_index + key_len
-    result = item[find_index: all_len].split(".")[0]
+    result = item[find_index: all_len]
     print("增量文件:", result)
     #print(result)
     f.write(result + "\n")
