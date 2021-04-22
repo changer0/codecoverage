@@ -30,6 +30,7 @@ output_file = "increment.txt"
 branch_key = "--branch"
 compare_branch = ""
 cur_branch = ""
+temp_branch = "temp"
 #遍历取参数
 for i in range(len(sys.argv)):
     if branch_key == sys.argv[i]:
@@ -67,19 +68,22 @@ cmd_git_fetch = "git fetch"
 run_cmd(cmd_git_fetch)
 
 # cmd_git_checkout_old_branch = "git checkout -b " + old_branch + " origin/" + old_branch
-cmd_create_new_branch = "git checkout -b " + cur_branch + " origin/" + cur_branch
-cmd_checkout_new_branch = "git checkout " + cur_branch
 
-print("切换分支: ", cur_branch)
-run_cmd(cmd_create_new_branch)
-run_cmd(cmd_checkout_new_branch)
-print("拉取代码: ", cur_branch)
+print("切换分支: ", temp_branch)
+# 把原来本地分支删掉
+run_cmd("git checkout -d " + temp_branch)
+# 新建一个本地分支
+run_cmd("git checkout -b " + temp_branch + " origin/" + cur_branch)
+# 切换至当前本地分支
+run_cmd("git checkout " + temp_branch)
+print("拉取代码: ", temp_branch)
 run_cmd("git pull")
+run_cmd("git pull origin " + compare_branch)
 
 print("----------------")
 
 print("开始比对")
-git_diff_result = run_cmd("git diff origin/" + compare_branch + " origin/" + cur_branch)
+git_diff_result = run_cmd("git diff " + temp_branch + " origin/" + compare_branch)
 searchObj = re.findall( '^diff --git (.*) ', git_diff_result, re.M | re.I)
 # 测试代码
 #searchObj = open("test_increment.txt", mode='r')
@@ -91,7 +95,7 @@ f = open(output_file, "w+")
 for item in searchObj:
     #print("origin item: ", item.strip())
     all_len = len(item)
-    key_len = len(prefix)
+    prefix_len = len(prefix)
     #print("path_key len: ", key_len)
     item_split = item.split(".")
     if len(item_split) < 2:
@@ -106,7 +110,7 @@ for item in searchObj:
     if find_index < 0:
         continue
     #print("发现路径:", find_index)
-    find_index = find_index + key_len
+    find_index = find_index + prefix_len
     result = item[find_index: all_len]
     print("增量文件:", result)
     #print(result)
