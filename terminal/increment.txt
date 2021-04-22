@@ -3,3 +3,4 @@ build-types/debug/java/com/qq/reader/common/monitor/debug/DebugRoutingActivity.j
 src/com/qq/reader/activity/TestCoverageClazz.java
 src/com/qq/reader/activity/TestCoverageKotlin.kt
 src/com/qq/reader/activity/UserCenterFragment.java
+src/com/qq/reader/module/tts/provider/TTSMarkBuilder.java
