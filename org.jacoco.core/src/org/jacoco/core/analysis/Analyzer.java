@@ -56,6 +56,8 @@ public class Analyzer {
 
 	private Set<String> incrementClassSet;
 
+	private Set<String> excludeClassSet;
+
 	/**
 	 * Creates a new analyzer reporting to the given output.
 	 *
@@ -118,7 +120,11 @@ public class Analyzer {
 		String className = reader.getClassName();
 		//1. 先看有没有设置增量类, 如果没有设置 isInclude 返回 true
 		//2. 如果有设置, 若当前包含在所设置的增量类中, 则返回 false 当前方法 return
-		if (!isInclude(incrementClassSet, className)) {
+		if (!isInclude(incrementClassSet, className, true)) {
+			return;
+		}
+		//如果包含排除类,就直接返回
+		if (isInclude(excludeClassSet, className, false)) {
 			return;
 		}
 		//System.out.println("当前包含的类名: " + className);
@@ -128,9 +134,9 @@ public class Analyzer {
 		reader.accept(visitor, 0);
 	}
 
-	private boolean isInclude(Set<String> stringSet, String className) {
+	private boolean isInclude(Set<String> stringSet, String className, boolean emptyReturn) {
 		if (stringSet == null || stringSet.isEmpty()) {
-			return true;
+			return emptyReturn;
 		}
 		Iterator<String> iterator = stringSet.iterator();
 		while (iterator.hasNext()) {
@@ -327,5 +333,9 @@ public class Analyzer {
 
 	public void setIncrementClassSet(Set<String> incrementClassSet) {
 		this.incrementClassSet = incrementClassSet;
+	}
+
+	public void setExcludeClassSet(Set<String> excludeClassSet) {
+		this.excludeClassSet = excludeClassSet;
 	}
 }

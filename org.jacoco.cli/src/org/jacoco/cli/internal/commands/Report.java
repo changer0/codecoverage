@@ -70,6 +70,10 @@ public class Report extends Command {
 	@Option(name = "--incrementPrefixFlag", usage = "用于过滤前缀")
 	String incrementPrefixFlag = "com/qq";
 
+	@Option(name = "--exclude", usage = "exclude class ", metaVar = "<file>")
+	File excludeFile;
+
+
 	@Override
 	public String description() {
 		return "Generate reports in different formats by reading exec and Java class files.";
@@ -86,17 +90,19 @@ public class Report extends Command {
 
 	private final Set<String> incrementClassSet = new HashSet<String>();
 
+	private final Set<String> excludeClassSet = new HashSet<String>();
+
 	/**
 	 * 解析增量 Class
 	 */
-	private void analyzeIncrementSetFile(PrintWriter out, File file, Set<String> stringSet) throws IOException {
-		if (file == null) {
+	private void analyzeIncrementSetFile(PrintWriter out) throws IOException {
+		if (incrementFile == null || !incrementFile.exists()) {
 			return;
 		}
-		out.println("increment" + " file path: " + file.getPath() + " incrementPrefixFlag = " + incrementPrefixFlag);
+		out.println("increment" + " file path: " + incrementFile.getPath() + " incrementPrefixFlag = " + incrementPrefixFlag);
 		BufferedReader br = null;
 		try {
-			br = new BufferedReader(new FileReader(file));
+			br = new BufferedReader(new FileReader(incrementFile));
 			out.println("increment" + " file content: ");
 			while(br.ready()) {
 				String x = br.readLine();
@@ -105,7 +111,7 @@ public class Report extends Command {
 				if (split.length > 1) {
 					x = split[0];
 				}
-				stringSet.add(x);
+				incrementClassSet.add(x);
 				out.println(x);
 			}
 		} finally {
@@ -118,6 +124,35 @@ public class Report extends Command {
 			}
 		}
 	}
+
+	/**
+	 * 解析排除 Class
+	 */
+	private void analyzeExcludeSetFile(PrintWriter out) throws IOException {
+		if (excludeFile == null || !excludeFile.exists()) {
+			return;
+		}
+		out.println("exclude" + " file path: " + excludeFile.getPath());
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(excludeFile));
+			out.println("exclude" + " file content: ");
+			while(br.ready()) {
+				String x = br.readLine();
+				excludeClassSet.add(x);
+				out.println(x);
+			}
+		} finally {
+			try {
+				if (br != null) {
+					br.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 
 	private ExecFileLoader loadExecutionData(final PrintWriter out)
 			throws IOException {
@@ -137,9 +172,11 @@ public class Report extends Command {
 	private IBundleCoverage analyze(final ExecutionDataStore data,
 			final PrintWriter out) throws IOException {
 		final CoverageBuilder builder = new CoverageBuilder();
-		analyzeIncrementSetFile(out, incrementFile, incrementClassSet);
+		analyzeIncrementSetFile(out);
+		analyzeExcludeSetFile(out);
 		final Analyzer analyzer = new Analyzer(data, builder);
 		analyzer.setIncrementClassSet(incrementClassSet);
+		analyzer.setExcludeClassSet(excludeClassSet);
 		for (final File f : classfiles) {
 			analyzer.analyzeAll(f);
 		}
