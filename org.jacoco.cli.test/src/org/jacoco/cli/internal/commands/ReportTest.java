@@ -158,7 +158,7 @@ public class ReportTest extends CommandTestBase {
 				"--sourcefiles", "/Users/zhanglulu/AndroidStudioProjects/QQReader_Android_other/coverage_src/source",
 				"--html", rootPath + "html/",
 				"--name", "QQ Reader Coverage Report",
-				"--exclude", "/Users/zhanglulu/AndroidStudioProjects/QQReader_Android_other/coverage/exclude.txt",//排除
+//				"--exclude", "/Users/zhanglulu/AndroidStudioProjects/QQReader_Android_other/coverage/exclude.txt",//排除
 				"--incrementPrefixFlag", "com/qq/reader",//增量前缀标识
 				"--increment",rootPath + "increment.txt");
 		System.out.println("输出:");
