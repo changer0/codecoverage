@@ -10,7 +10,7 @@ def run_cmd(command):
     subp.wait()
     return subp.communicate()[0]
 
-suffix_list = ["java", "kt"]
+suffix_list = ["java", "kt", "m"]
 # 后缀是否可用
 def suffix_enable(suffix):
     for s in suffix_list:
@@ -68,10 +68,11 @@ cmd_git_fetch = "git fetch"
 run_cmd(cmd_git_fetch)
 
 # cmd_git_checkout_old_branch = "git checkout -b " + old_branch + " origin/" + old_branch
-
+# 先把分支切换到 master
+run_cmd("git checkout master")
 print("切换分支: ", temp_branch)
 # 把原来本地分支删掉
-run_cmd("git checkout -d " + temp_branch)
+run_cmd("git branch -d " + temp_branch)
 # 新建一个本地分支
 run_cmd("git checkout -b " + temp_branch + " origin/" + cur_branch)
 # 切换至当前本地分支
